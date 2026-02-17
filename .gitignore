@@ -1,1 +1,6 @@
 .clangd
+./CHANGELOG.md
+./LICENSE
+./test
+./src
+./dist-newstyle
