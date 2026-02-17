@@ -14,21 +14,28 @@ typedef struct wl_registry wl_registry;
 typedef struct wl_compositor wl_compositor;
 typedef struct xdg_wm_base xdg_wm_base;
 typedef struct wl_shm wl_shm;
+typedef struct wl_surface wl_surface;
+typedef struct xdg_surface xdg_surface;
 
 struct state {
+  //Globals
   wl_display *display;
   wl_registry *registry;
   
   wl_compositor *compositor;
   xdg_wm_base *wm_base;
   wl_shm *shm;
+
+  //Objects
+  wl_surface *surface;
+  xdg_surface *xdg_surface;
 };
+
 // -------
 
 /*
    --- WRAPPERS ---
 */
-
 //Connect to display wrapper
 wl_display
 *display_connect(const char *name) {
@@ -58,7 +65,6 @@ wl_registry
 }
 
 //binding wrapper
-
 static void 
 registry_global(void *data,
              wl_registry *registry,
@@ -81,7 +87,7 @@ registry_global(void *data,
     fprintf(stderr, "not handled yet !\n");
   }
 
-  if(!app->compositor || !app->wm_base || !app->wm_base ) {
+  if(!app->compositor && !app->wm_base && !app->shm ) {
     fprintf(stderr, "failed to bind objects\n");
   }
   else {
@@ -116,7 +122,11 @@ main (int argc, char *argv[]){
   // -----
   
   wl_registry_add_listener(app->registry, &wlr_listener, app);
-  wl_display_roundtrip(app->display);  
+  wl_display_roundtrip(app->display);
+
+  //Surface
+  app->surface = wl_compositor_create_surface(app->compositor);
+  app->xdg_surface = xdg_wm_base_get_xdg_surface(app->wm_base, app->surface);
   
   wl_display_disconnect(app->display);
   free(app);
@@ -124,5 +134,6 @@ main (int argc, char *argv[]){
 }
 
 // Road Map:
-
-//to do: log file 
+// surface listener ? 
+// attach first buffer 
+// to do: log file 
